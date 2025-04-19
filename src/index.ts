@@ -2,7 +2,6 @@ import express from "express";
 import { setupApp } from "./setup-app";
 import { videosRouter } from "./routes/videos.router";
 import { testsRouter } from "src/routes/tests.router";
-import "tsconfig-paths/register";
 
 export const app = express();
 setupApp(app);
