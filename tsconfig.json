@@ -11,6 +11,7 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "src": ["src/index.ts"],
       "src/*": ["src/*"]
     }
   },

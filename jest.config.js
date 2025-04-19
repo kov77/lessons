@@ -6,5 +6,6 @@ module.exports = {
   },
   moduleNameMapper: {
     "^src$": "<rootDir>/src/index.ts",
+    "^src/(.*)$": "<rootDir>/src/$1",
   },
 };
