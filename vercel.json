@@ -2,9 +2,9 @@
   "version": 2,
   "name": "lessons-be",
   "builds": [
-    { "src": "src/index.ts", "use": "@vercel/node" }
+    { "src": "api/index.ts", "use": "@vercel/node" }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "src/index.ts" }
+    { "src": "/(.*)", "dest": "api/index.ts" }
   ]
 }
