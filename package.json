@@ -16,8 +16,7 @@
   "packageManager": "pnpm@10.8.0",
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "4",
-    "tsconfig-paths": "^4.2.0"
+    "express": "4"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
