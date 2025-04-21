@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "../db/db";
 import type { Request, Response } from "express";
-import { validateVideoInput } from "src/utils";
+import { validateVideoInput } from "../utils";
 
 export const videosRouter = Router();
 
