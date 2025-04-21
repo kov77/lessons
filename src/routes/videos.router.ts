@@ -37,6 +37,15 @@ videosRouter.post("/", (req: Request, res: Response) => {
     return;
   }
 
+  if (typeof req.body.author !== "string" || req.body.author.length > 20) {
+    sendValidationError(
+      res,
+      "author",
+      "Author must be string and max 20 chars",
+    );
+    return;
+  }
+
   const validResolutions = [
     "P144",
     "P240",
@@ -114,22 +123,83 @@ videosRouter.put("/:id", (req: Request, res: Response) => {
     return;
   }
 
-  if (!req.body.title) {
-    res.status(400).send({ error: "Title is required" });
-    return;
+  const {
+    title,
+    author,
+    availableResolutions,
+    canBeDownloaded,
+    minAgeRestriction,
+    publicationDate,
+  } = req.body;
+
+  const errors: { message: string; field: string }[] = [];
+
+  if (!title || typeof title !== "string" || title.length > 40) {
+    errors.push({
+      field: "title",
+      message: "Title must be string and max 40 chars",
+    });
   }
 
-  if (!req.body.author) {
-    res.status(400).send({ error: "Author is required" });
-    return;
+  if (!author || typeof author !== "string" || author.length > 20) {
+    errors.push({
+      field: "author",
+      message: "Author must be string and max 20 chars",
+    });
   }
 
-  if (!req.body.availableResolutions) {
-    res.status(400).send({ error: "Available resolutions are required" });
-    return;
+  const validResolutions = [
+    "P144",
+    "P240",
+    "P360",
+    "P480",
+    "P720",
+    "P1080",
+    "P1440",
+    "P2160",
+  ];
+  if (
+    !Array.isArray(availableResolutions) ||
+    !availableResolutions.every((r: string) => validResolutions.includes(r))
+  ) {
+    errors.push({
+      field: "availableResolutions",
+      message: "Invalid resolutions",
+    });
+  }
+
+  if (canBeDownloaded && typeof canBeDownloaded !== "boolean") {
+    errors.push({ field: canBeDownloaded, message: "Must be boolean" });
+  }
+
+  if (
+    minAgeRestriction &&
+    (typeof minAgeRestriction !== "number" ||
+      1 < minAgeRestriction ||
+      minAgeRestriction > 18)
+  ) {
+    errors.push({
+      field: minAgeRestriction,
+      message: "Must be a number from 1 to 18",
+    });
+  }
+
+  if (
+    publicationDate &&
+    (typeof publicationDate !== "string" || isNaN(Date.parse(publicationDate)))
+  ) {
+    errors.push({
+      field: publicationDate,
+      message: "Must be valid ISO string date",
+    });
   }
 
   db.videos[videoId] = { ...db.videos[videoId], ...req.body };
+
+  if (errors.length) {
+    res.status(400).send({ errorsMessages: errors });
+    return;
+  }
 
   res.sendStatus(204);
 });
