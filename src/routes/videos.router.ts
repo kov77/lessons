@@ -11,6 +11,7 @@ videosRouter.get("/", (req: Request, res: Response) => {
 
 videosRouter.post("/", (req: Request, res: Response) => {
   const newId = db.videos.length ? db.videos[db.videos.length - 1].id + 1 : 0;
+  const now = new Date();
 
   if (!req.body.title) {
     sendValidationError(res, "title", "Title is required");
@@ -31,14 +32,45 @@ videosRouter.post("/", (req: Request, res: Response) => {
     return;
   }
 
+  if (typeof req.body.title !== "string" || req.body.title.length > 40) {
+    sendValidationError(res, "title", "Title must be string and max 40 chars");
+    return;
+  }
+
+  const validResolutions = [
+    "P144",
+    "P240",
+    "P360",
+    "P480",
+    "P720",
+    "P1080",
+    "P1440",
+    "P2160",
+  ];
+  if (
+    !Array.isArray(req.body.availableResolutions) ||
+    !req.body.availableResolutions.every((r: string) =>
+      validResolutions.includes(r),
+    )
+  ) {
+    sendValidationError(
+      res,
+      "availableResolutions",
+      "Available resolutions are invalid",
+    );
+    return;
+  }
+
   db.videos.push({
     id: newId,
     title: req.body.title,
     author: req.body.author,
-    canBeDownloaded: true,
+    canBeDownloaded: false,
     minAgeRestriction: null,
-    createdAt: new Date().toISOString(),
-    publicationDate: new Date().toISOString(),
+    createdAt: now.toISOString(),
+    publicationDate: new Date(
+      now.getTime() + 24 * 60 * 60 * 1000,
+    ).toISOString(),
     availableResolutions: req.body.availableResolutions,
   });
 
