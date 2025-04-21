@@ -1,5 +1,6 @@
-import express, { Express, Request, Response } from "express";
+import express, { Express } from "express";
 import cors from "cors";
+import type { Request, Response } from "express";
 
 export const setupApp = (app: Express) => {
   app.use(express.json());
