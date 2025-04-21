@@ -10,7 +10,7 @@
     "strict": true,
     "skipLibCheck": true,
     "baseUrl": ".",
-    "types": ["node", "express"],
+    "types": ["node", "express", "jest"],
     "paths": {
       "src/*": ["src/*"]
     }
