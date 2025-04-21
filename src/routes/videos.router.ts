@@ -89,15 +89,15 @@ videosRouter.post("/", (req: Request, res: Response) => {
 
   db.videos.push({
     id: newId,
-    title: req.body.title,
-    author: req.body.author,
-    canBeDownloaded: false,
-    minAgeRestriction: null,
+    title,
+    author,
+    canBeDownloaded,
+    minAgeRestriction,
     createdAt: now.toISOString(),
     publicationDate: new Date(
       now.getTime() + 24 * 60 * 60 * 1000,
     ).toISOString(),
-    availableResolutions: req.body.availableResolutions,
+    availableResolutions,
   });
 
   res.status(201).send(db.videos[newId]);
