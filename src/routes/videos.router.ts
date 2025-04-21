@@ -4,11 +4,11 @@ import { sendValidationError } from "../utils";
 
 export const videosRouter = Router();
 
-videosRouter.get("/", (req, res) => {
+videosRouter.get("/", (req: Request, res: Response) => {
   res.status(200).send(db.videos);
 });
 
-videosRouter.post("/", (req, res) => {
+videosRouter.post("/", (req: Request, res: Response) => {
   const newId = db.videos.length ? db.videos[db.videos.length - 1].id + 1 : 0;
 
   if (!req.body.title) {
