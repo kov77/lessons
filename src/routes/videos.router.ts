@@ -56,14 +56,14 @@ videosRouter.post("/", (req: Request, res: Response) => {
     });
   }
 
-  if (canBeDownloaded && typeof canBeDownloaded !== "boolean") {
+  if (canBeDownloaded !== undefined && typeof canBeDownloaded !== "boolean") {
     errors.push({ field: "canBeDownloaded", message: "Must be boolean" });
   }
 
   if (
-    minAgeRestriction &&
+    minAgeRestriction !== undefined &&
     (typeof minAgeRestriction !== "number" ||
-      1 < minAgeRestriction ||
+      minAgeRestriction < 1 ||
       minAgeRestriction > 18)
   ) {
     errors.push({
@@ -91,8 +91,8 @@ videosRouter.post("/", (req: Request, res: Response) => {
     id: newId,
     title,
     author,
-    canBeDownloaded,
-    minAgeRestriction,
+    canBeDownloaded: canBeDownloaded ?? false,
+    minAgeRestriction: minAgeRestriction ?? null,
     createdAt: now.toISOString(),
     publicationDate: new Date(
       now.getTime() + 24 * 60 * 60 * 1000,
@@ -185,14 +185,14 @@ videosRouter.put("/:id", (req: Request, res: Response) => {
     });
   }
 
-  if (canBeDownloaded && typeof canBeDownloaded !== "boolean") {
+  if (canBeDownloaded !== undefined && typeof canBeDownloaded !== "boolean") {
     errors.push({ field: "canBeDownloaded", message: "Must be boolean" });
   }
 
   if (
-    minAgeRestriction &&
+    minAgeRestriction !== undefined &&
     (typeof minAgeRestriction !== "number" ||
-      1 < minAgeRestriction ||
+      minAgeRestriction < 1 ||
       minAgeRestriction > 18)
   ) {
     errors.push({
