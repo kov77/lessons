@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { db } from "../db/db";
-import { sendValidationError } from "../utils";
 import type { Request, Response } from "express";
 
 export const videosRouter = Router();
@@ -12,38 +11,29 @@ videosRouter.get("/", (req: Request, res: Response) => {
 videosRouter.post("/", (req: Request, res: Response) => {
   const newId = db.videos.length ? db.videos[db.videos.length - 1].id + 1 : 0;
   const now = new Date();
+  const {
+    title,
+    author,
+    availableResolutions,
+    canBeDownloaded,
+    minAgeRestriction,
+    publicationDate,
+  } = req.body;
 
-  if (!req.body.title) {
-    sendValidationError(res, "title", "Title is required");
-    return;
+  const errors: { message: string; field: string }[] = [];
+
+  if (!title || typeof title !== "string" || title.length > 40) {
+    errors.push({
+      field: "title",
+      message: "Title must be string and max 40 chars",
+    });
   }
 
-  if (!req.body.author) {
-    sendValidationError(res, "author", "Author is required");
-    return;
-  }
-
-  if (!req.body.availableResolutions) {
-    sendValidationError(
-      res,
-      "availableResolutions",
-      "Available resolutions are required",
-    );
-    return;
-  }
-
-  if (typeof req.body.title !== "string" || req.body.title.length > 40) {
-    sendValidationError(res, "title", "Title must be string and max 40 chars");
-    return;
-  }
-
-  if (typeof req.body.author !== "string" || req.body.author.length > 20) {
-    sendValidationError(
-      res,
-      "author",
-      "Author must be string and max 20 chars",
-    );
-    return;
+  if (!author || typeof author !== "string" || author.length > 20) {
+    errors.push({
+      field: "author",
+      message: "Author must be string and max 20 chars",
+    });
   }
 
   const validResolutions = [
@@ -57,16 +47,43 @@ videosRouter.post("/", (req: Request, res: Response) => {
     "P2160",
   ];
   if (
-    !Array.isArray(req.body.availableResolutions) ||
-    !req.body.availableResolutions.every((r: string) =>
-      validResolutions.includes(r),
-    )
+    !Array.isArray(availableResolutions) ||
+    !availableResolutions.every((r: string) => validResolutions.includes(r))
   ) {
-    sendValidationError(
-      res,
-      "availableResolutions",
-      "Available resolutions are invalid",
-    );
+    errors.push({
+      field: "availableResolutions",
+      message: "Invalid resolutions",
+    });
+  }
+
+  if (canBeDownloaded && typeof canBeDownloaded !== "boolean") {
+    errors.push({ field: "canBeDownloaded", message: "Must be boolean" });
+  }
+
+  if (
+    minAgeRestriction &&
+    (typeof minAgeRestriction !== "number" ||
+      1 < minAgeRestriction ||
+      minAgeRestriction > 18)
+  ) {
+    errors.push({
+      field: "minAgeRestriction",
+      message: "Must be a number from 1 to 18",
+    });
+  }
+
+  if (
+    publicationDate &&
+    (typeof publicationDate !== "string" || isNaN(Date.parse(publicationDate)))
+  ) {
+    errors.push({
+      field: "publicationDate",
+      message: "Must be valid ISO string date",
+    });
+  }
+
+  if (errors.length) {
+    res.status(400).send({ errorsMessages: errors });
     return;
   }
 
@@ -169,7 +186,7 @@ videosRouter.put("/:id", (req: Request, res: Response) => {
   }
 
   if (canBeDownloaded && typeof canBeDownloaded !== "boolean") {
-    errors.push({ field: canBeDownloaded, message: "Must be boolean" });
+    errors.push({ field: "canBeDownloaded", message: "Must be boolean" });
   }
 
   if (
@@ -179,7 +196,7 @@ videosRouter.put("/:id", (req: Request, res: Response) => {
       minAgeRestriction > 18)
   ) {
     errors.push({
-      field: minAgeRestriction,
+      field: "minAgeRestriction",
       message: "Must be a number from 1 to 18",
     });
   }
@@ -189,17 +206,17 @@ videosRouter.put("/:id", (req: Request, res: Response) => {
     (typeof publicationDate !== "string" || isNaN(Date.parse(publicationDate)))
   ) {
     errors.push({
-      field: publicationDate,
+      field: "publicationDate",
       message: "Must be valid ISO string date",
     });
   }
-
-  db.videos[videoId] = { ...db.videos[videoId], ...req.body };
 
   if (errors.length) {
     res.status(400).send({ errorsMessages: errors });
     return;
   }
+
+  db.videos[videoId] = { ...db.videos[videoId], ...req.body };
 
   res.sendStatus(204);
 });
