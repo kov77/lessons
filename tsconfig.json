@@ -4,6 +4,7 @@
     "module": "commonjs",
     "rootDir": "./src",
     "outDir": "./dist",
+    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
@@ -11,10 +12,9 @@
     "baseUrl": ".",
     "types": ["node", "express"],
     "paths": {
-      "src": ["src/index.ts"],
       "src/*": ["src/*"]
     }
   },
   "include": ["src/**/*"],
-  "exclude": ["__tests__", "dist", "node_modules"]
+  "exclude": ["dist", "node_modules", "__tests__"]
 }
