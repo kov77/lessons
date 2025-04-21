@@ -37,8 +37,8 @@ videosRouter.post("/", (req: Request, res: Response) => {
     author: req.body.author,
     canBeDownloaded: true,
     minAgeRestriction: null,
-    createdAt: new Date().toDateString(),
-    publicationDate: new Date().toDateString(),
+    createdAt: new Date().toISOString(),
+    publicationDate: new Date().toISOString(),
     availableResolutions: req.body.availableResolutions,
   });
 
