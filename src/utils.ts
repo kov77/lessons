@@ -8,7 +8,6 @@ type VideoInput = {
 };
 
 export function validateVideoInput(data: VideoInput) {
-  console.log(data);
   const {
     title,
     author,
