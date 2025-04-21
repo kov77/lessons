@@ -1,0 +1,12 @@
+dist/
+node_modules/
+pnpm-lock.yaml
+.vscode/
+.env
+*.test.ts
+__tests__/
+coverage/
+.eslintrc.js
+.prettierrc
+tsconfig.json
+jest.config.*
