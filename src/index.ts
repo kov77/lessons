@@ -6,7 +6,7 @@ import { setupApp } from "./setup-app";
 const app = express();
 setupApp(app);
 
-app.use("/hometask_01/api/videos", videosRouter);
-app.use("/hometask_01/api/testing", testsRouter);
+app.use("/videos", videosRouter);
+app.use("/testing", testsRouter);
 
 export default app;
