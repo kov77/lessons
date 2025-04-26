@@ -56,4 +56,7 @@ export const videosRepository = {
     db.videos.splice(videoIndex, 1);
     return deletedVideo;
   },
+  deleteAllVideos() {
+    db.videos = [];
+  },
 };
