@@ -1,45 +1,23 @@
 import { Router } from "express";
-import { db } from "../db/db";
 import type { Request, Response } from "express";
 import { validateVideoInput } from "../utils";
+import { videosRepository } from "src/repositories/videos-repository";
 
 export const videosRouter = Router();
 
 videosRouter.get("/", (req: Request, res: Response) => {
-  res.status(200).send(db.videos);
+  const videos = videosRepository.getAllVideos();
+  res.status(200).send(videos);
 });
 
 videosRouter.post("/", (req: Request, res: Response) => {
-  const newId = db.videos.length ? db.videos[db.videos.length - 1].id + 1 : 0;
-  const now = new Date();
-  const {
-    title,
-    author,
-    availableResolutions,
-    canBeDownloaded,
-    minAgeRestriction,
-  } = req.body;
-
   const errors = validateVideoInput(req.body);
   if (errors.length) {
     res.status(400).send({ errorsMessages: errors });
     return;
   }
-
-  db.videos.push({
-    id: newId,
-    title,
-    author,
-    canBeDownloaded: canBeDownloaded ?? false,
-    minAgeRestriction: minAgeRestriction ?? null,
-    createdAt: now.toISOString(),
-    publicationDate: new Date(
-      now.getTime() + 24 * 60 * 60 * 1000,
-    ).toISOString(),
-    availableResolutions,
-  });
-
-  res.status(201).send(db.videos[newId]);
+  const newVideo = videosRepository.addVideo(req.body);
+  res.status(201).send(newVideo);
 });
 
 videosRouter.get("/:id", (req: Request, res: Response) => {
@@ -54,12 +32,14 @@ videosRouter.get("/:id", (req: Request, res: Response) => {
     return;
   }
 
-  if (!db.videos[videoId]) {
+  const video = videosRepository.getVideoById(videoId);
+
+  if (!video) {
     res.status(404).send({ error: "Video doesn't exist" });
     return;
   }
 
-  res.status(200).send(db.videos[videoId]);
+  res.status(200).send(video);
 });
 
 videosRouter.put("/:id", (req: Request, res: Response) => {
@@ -74,7 +54,9 @@ videosRouter.put("/:id", (req: Request, res: Response) => {
     return;
   }
 
-  if (!db.videos[videoId]) {
+  const video = videosRepository.updateVideo(videoId, req.body);
+
+  if (!video) {
     res.status(404).send({ error: "Video doesn't exist" });
     return;
   }
@@ -84,8 +66,6 @@ videosRouter.put("/:id", (req: Request, res: Response) => {
     res.status(400).send({ errorsMessages: errors });
     return;
   }
-
-  db.videos[videoId] = { ...db.videos[videoId], ...req.body };
 
   res.sendStatus(204);
 });
@@ -102,12 +82,12 @@ videosRouter.delete("/:id", (req: Request, res: Response) => {
     return;
   }
 
-  if (!db.videos[videoId]) {
+  const video = videosRepository.deleteVideo(videoId);
+
+  if (!video) {
     res.status(404).send({ error: "Video doesn't exist" });
     return;
   }
-
-  db.videos.splice(videoId, 1);
 
   res.sendStatus(204);
 });
