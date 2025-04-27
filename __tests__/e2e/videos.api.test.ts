@@ -3,13 +3,8 @@ import app from "src";
 
 describe("Videos", () => {
   const testVideoData = {
-    id: 0,
     title: "video 1",
     author: "Author 1",
-    canBeDownloaded: true,
-    minAgeRestriction: null,
-    createdAt: "2025-04-13T01:58:45.604Z",
-    publicationDate: "2025-04-13T01:58:45.604Z",
     availableResolutions: ["P144", "P360", "P480"],
   };
 
@@ -19,7 +14,6 @@ describe("Videos", () => {
 
   it("should create video", async () => {
     const newVideo = {
-      ...testVideoData,
       title: "Movie43",
       author: "Steven Brill",
       availableResolutions: ["P360", "P480"],
