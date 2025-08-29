@@ -109,3 +109,38 @@ export const videoValidationMiddleware = [
   videoMinAgeRestrictionValidator,
   videoPublicationDateValidator,
 ];
+
+export const blogNameValidator = body("name")
+  .isString()
+  .withMessage("Name should be a string")
+  .trim()
+  .notEmpty()
+  .withMessage("Name is required")
+  .isLength({ min: 1, max: 15 })
+  .withMessage("Name should be from 1 to 15 characters long");
+
+export const blogDescriptionValidator = body("description")
+  .isString()
+  .withMessage("Description should be a string")
+  .trim()
+  .notEmpty()
+  .withMessage("Description is required")
+  .isLength({ min: 1, max: 500 })
+  .withMessage("Description should be from 1 to 500 characters long");
+
+export const blogWebsiteUrlValidator = body("websiteUrl")
+  .isString()
+  .withMessage("WebsiteUrl should be a string")
+  .trim()
+  .notEmpty()
+  .withMessage("WebsiteUrl is required")
+  .isLength({ min: 1, max: 100 })
+  .withMessage("WebsiteUrl should be from 1 to 100 characters long")
+  .matches(/^https?:\/\/(www\.)?[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}\/?$/)
+  .withMessage("WebsiteUrl should be a valid URL");
+
+export const blogValidationMiddleware = [
+  blogNameValidator,
+  blogDescriptionValidator,
+  blogWebsiteUrlValidator,
+];
