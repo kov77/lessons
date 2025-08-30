@@ -69,3 +69,17 @@ blogsRouter.put(
     res.status(200).send(updatedBlog);
   },
 );
+
+blogsRouter.delete("/:id", (req: Request, res: Response) => {
+  const id = req.params.id;
+  const blogIndex = blogsRepository.getAllBlogs().findIndex((b) => b.id === id);
+
+  if (blogIndex === -1) {
+    res.status(404).send({ error: "Blog doesn't exist" });
+    return;
+  }
+
+  blogsRepository.getAllBlogs().splice(blogIndex, 1);
+
+  res.sendStatus(204);
+});
