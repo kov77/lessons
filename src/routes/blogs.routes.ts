@@ -41,3 +41,31 @@ blogsRouter.get(
     res.status(200).send(blog);
   },
 );
+
+blogsRouter.put(
+  "/:id",
+  ...blogValidationMiddleware,
+  handleValidationResult,
+  (req: Request, res: Response) => {
+    const id = req.params.id;
+    const blogIndex = blogsRepository
+      .getAllBlogs()
+      .findIndex((b) => b.id === id);
+
+    if (blogIndex === -1) {
+      res.status(404).send({ error: "Blog doesn't exist" });
+      return;
+    }
+
+    const updatedBlog = {
+      ...blogsRepository.getAllBlogs()[blogIndex],
+      name: req.body.name,
+      description: req.body.description,
+      websiteUrl: req.body.websiteUrl,
+    };
+
+    blogsRepository.getAllBlogs()[blogIndex] = updatedBlog;
+
+    res.status(200).send(updatedBlog);
+  },
+);
