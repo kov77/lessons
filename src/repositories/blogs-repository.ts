@@ -10,7 +10,6 @@ export const blogsRepository = {
       name,
       description,
       websiteUrl,
-      createdAt: new Date().toISOString(),
     };
     db.blogs.push(newBlog);
     return newBlog;
