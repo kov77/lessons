@@ -14,4 +14,7 @@ export const blogsRepository = {
     db.blogs.push(newBlog);
     return newBlog;
   },
+  deleteAllBlogs() {
+    db.blogs = [];
+  },
 };

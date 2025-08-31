@@ -17,12 +17,12 @@ blogsRouter.post(
   ...blogValidationMiddleware,
   handleValidationResult,
   (req: Request, res: Response) => {
-    blogsRepository.addNewBlog(
+    const newBlog = blogsRepository.addNewBlog(
       req.body.name,
       req.body.description,
       req.body.websiteUrl,
     );
-    res.status(201);
+    res.status(201).send(newBlog);
   },
 );
 
