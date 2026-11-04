@@ -1,9 +1,12 @@
-import { Response, Router } from "express";
-import { db } from "src/db/db";
+import { Router } from "express";
+import type { Request, Response } from "express";
+import { postsRepository } from "../repositories/posts-repository";
+import { blogsRepository } from "../repositories/blogs-repository";
 
 export const testsRouter = Router();
 
-testsRouter.delete("/all-data", (_, res: Response) => {
-  db.videos = [];
-  res.sendStatus(204).send("All data is deleted");
+testsRouter.delete("/all-data", (req: Request, res: Response) => {
+  blogsRepository.deleteAllBlogs();
+  postsRepository.deleteAllPosts();
+  res.sendStatus(204);
 });

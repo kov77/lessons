@@ -1,124 +1,82 @@
-import { Request, Response, Router } from "express";
-import { db } from "../db/db";
-import { sendValidationError } from "../utils";
+import { Router } from "express";
+import type { Request, Response } from "express";
+import { videosRepository } from "../repositories/videos-repository";
+import {
+  handleValidationResult,
+  videoIdValidator,
+  videoNotIsNaNValidator,
+  videoValidationMiddleware,
+} from "../middlewares/validation/express-validator/input-validators";
 
 export const videosRouter = Router();
 
-videosRouter.get("/", (req, res) => {
-  res.status(200).send(db.videos);
+videosRouter.get("/", (req: Request, res: Response) => {
+  const videos = videosRepository.getAllVideos();
+  res.status(200).send(videos);
 });
 
-videosRouter.post("/", (req, res) => {
-  const newId = db.videos.length ? db.videos[db.videos.length - 1].id + 1 : 0;
+videosRouter.post(
+  "/",
+  ...videoValidationMiddleware,
+  handleValidationResult,
+  (req: Request, res: Response) => {
+    const newVideo = videosRepository.addVideo(req.body);
+    res.status(201).send(newVideo);
+  },
+);
 
-  if (!req.body.title) {
-    sendValidationError(res, "title", "Title is required");
-    return;
-  }
+videosRouter.get(
+  "/:id",
+  videoIdValidator,
+  handleValidationResult,
+  (req: Request, res: Response) => {
+    const videoId = parseInt(req.params.id);
 
-  if (!req.body.author) {
-    sendValidationError(res, "author", "Author is required");
-    return;
-  }
+    const video = videosRepository.getVideoById(videoId);
 
-  if (!req.body.availableResolutions) {
-    sendValidationError(
-      res,
-      "availableResolutions",
-      "Available resolutions are required",
-    );
-    return;
-  }
+    if (!video) {
+      res.status(404).send({ error: "Video doesn't exist" });
+      return;
+    }
 
-  db.videos.push({
-    id: newId,
-    title: req.body.title,
-    author: req.body.author,
-    canBeDownloaded: true,
-    minAgeRestriction: null,
-    createdAt: new Date().toDateString(),
-    publicationDate: new Date().toDateString(),
-    availableResolutions: req.body.availableResolutions,
-  });
+    res.status(200).send(video);
+  },
+);
 
-  res.status(201).send(db.videos[newId]);
-});
+videosRouter.put(
+  "/:id",
+  videoIdValidator,
+  videoNotIsNaNValidator,
+  ...videoValidationMiddleware,
+  handleValidationResult,
+  (req: Request, res: Response) => {
+    const videoId = parseInt(req.params.id);
 
-videosRouter.get("/:id", (req: Request, res: Response) => {
-  const videoId = parseInt(req.params.id);
-  if (videoId === undefined) {
-    res.status(400).send({ error: "videoId is required" });
-    return;
-  }
+    const video = videosRepository.updateVideo(videoId, req.body);
 
-  if (isNaN(videoId)) {
-    res.status(400).send({ error: "videoId should be a number" });
-    return;
-  }
+    if (!video) {
+      res.status(404).send({ error: "Video doesn't exist" });
+      return;
+    }
 
-  if (!db.videos[videoId]) {
-    res.status(404).send({ error: "Video doesn't exist" });
-    return;
-  }
+    res.sendStatus(204);
+  },
+);
 
-  res.status(200).send(db.videos[videoId]);
-});
+videosRouter.delete(
+  "/:id",
+  videoIdValidator,
+  handleValidationResult,
+  (req: Request, res: Response) => {
+    const videoId = parseInt(req.params.id);
 
-videosRouter.put("/:id", (req: Request, res: Response) => {
-  const videoId = parseInt(req.params.id);
-  if (videoId === undefined) {
-    res.status(400).send({ error: "videoId is required" });
-    return;
-  }
+    const video = videosRepository.deleteVideo(videoId);
 
-  if (isNaN(videoId)) {
-    res.status(400).send({ error: "videoId should be a number" });
-    return;
-  }
+    if (!video) {
+      res.status(404).send({ error: "Video doesn't exist" });
+      return;
+    }
 
-  if (!db.videos[videoId]) {
-    res.status(404).send({ error: "Video doesn't exist" });
-    return;
-  }
-
-  if (!req.body.title) {
-    res.status(400).send({ error: "Title is required" });
-    return;
-  }
-
-  if (!req.body.author) {
-    res.status(400).send({ error: "Author is required" });
-    return;
-  }
-
-  if (!req.body.availableResolutions) {
-    res.status(400).send({ error: "Available resolutions are required" });
-    return;
-  }
-
-  db.videos[videoId] = { ...db.videos[videoId], ...req.body };
-
-  res.sendStatus(204);
-});
-
-videosRouter.delete("/:id", (req: Request, res: Response) => {
-  const videoId = parseInt(req.params.id);
-  if (videoId === undefined) {
-    res.status(400).send({ error: "videoId is required" });
-    return;
-  }
-
-  if (isNaN(videoId)) {
-    res.status(400).send({ error: "videoId should be a number" });
-    return;
-  }
-
-  if (!db.videos[videoId]) {
-    res.status(404).send({ error: "Video doesn't exist" });
-    return;
-  }
-
-  db.videos.splice(videoId, 1);
-
-  res.sendStatus(204);
-});
+    res.sendStatus(204);
+  },
+);

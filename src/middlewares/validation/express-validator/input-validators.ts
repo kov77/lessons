@@ -1,0 +1,187 @@
+import { body, param, validationResult } from "express-validator";
+import { db } from "../../../db/db";
+import { NextFunction, Request, Response } from "express";
+
+const validResolutions = [
+  "P144",
+  "P240",
+  "P360",
+  "P480",
+  "P720",
+  "P1080",
+  "P1440",
+  "P2160",
+];
+
+const formatErrors = (error: any) => ({
+  field: error.path,
+  message: error.msg,
+});
+
+export const handleValidationResult = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const errors = validationResult(req)
+    .formatWith(formatErrors)
+    .array({ onlyFirstError: true });
+
+  if (errors.length) {
+    return res.status(400).json({ errorsMessages: errors });
+  }
+  next();
+};
+
+export const videoTitleValidator = body("title")
+  .isString()
+  .withMessage("Title should be a string")
+  .trim()
+  .notEmpty()
+  .withMessage("title is required")
+  .isLength({ min: 1, max: 40 })
+  .withMessage("Title should be from 1 to 40 characters long");
+
+export const videoAuthorValidator = body("author")
+  .trim()
+  .notEmpty()
+  .withMessage("Author is required")
+  .isLength({ min: 1, max: 20 })
+  .withMessage("Author should be from 1 to 20 characters long");
+
+export const videoAvailableResolutionsValidator = body("availableResolutions")
+  .isArray()
+  .withMessage("Available resolutions should be an array")
+  .custom((value) => {
+    return value.every((resolution: string) =>
+      validResolutions.includes(resolution),
+    );
+  })
+  .withMessage("Invalid resolutions");
+
+export const videoCanBeDownloadedValidator = body("canBeDownloaded")
+  .optional()
+  .isBoolean()
+  .withMessage("canBeDownloaded should be boolean");
+
+export const videoMinAgeRestrictionValidator = body("minAgeRestriction")
+  .optional()
+  .isInt({ min: 1, max: 18 })
+  .withMessage("minAgeRestriction should be a number from 1 to 18");
+
+export const videoPublicationDateValidator = body("publicationDate")
+  .optional()
+  .isString()
+  .withMessage("publicationDate should be a string")
+  .custom((value) => {
+    if (value && isNaN(Date.parse(value))) {
+      throw new Error("publicationDate should be a valid ISO date");
+    }
+    return true;
+  });
+
+export const videoIdValidator = param("id")
+  .notEmpty()
+  .withMessage("videoId is required")
+  .isInt()
+  .withMessage("videoId should be a number")
+  .custom((value) => {
+    if (parseInt(value) < 0) {
+      throw new Error("videoId should be a positive number");
+    }
+    return true;
+  });
+
+export const videoNotIsNaNValidator = param("id")
+  .notEmpty()
+  .withMessage("videoId is required")
+  .isInt()
+  .withMessage("videoId should be a number")
+  .custom((value) => {
+    if (isNaN(parseInt(value))) {
+      throw new Error("videoId should be a number");
+    }
+    return true;
+  });
+
+export const videoValidationMiddleware = [
+  videoAuthorValidator,
+  videoTitleValidator,
+  videoAvailableResolutionsValidator,
+  videoCanBeDownloadedValidator,
+  videoMinAgeRestrictionValidator,
+  videoPublicationDateValidator,
+];
+
+export const blogNameValidator = body("name")
+  .isString()
+  .withMessage("Name should be a string")
+  .trim()
+  .notEmpty()
+  .withMessage("Name is required")
+  .isLength({ min: 1, max: 15 })
+  .withMessage("Name should be from 1 to 15 characters long");
+
+export const blogDescriptionValidator = body("description")
+  .isString()
+  .withMessage("Description should be a string")
+  .trim()
+  .notEmpty()
+  .withMessage("Description is required")
+  .isLength({ min: 1, max: 500 })
+  .withMessage("Description should be from 1 to 500 characters long");
+
+export const blogWebsiteUrlValidator = body("websiteUrl")
+  .isString()
+  .withMessage("WebsiteUrl should be a string")
+  .trim()
+  .notEmpty()
+  .withMessage("WebsiteUrl is required")
+  .isLength({ min: 1, max: 100 })
+  .withMessage("WebsiteUrl should be from 1 to 100 characters long")
+  .matches(/^https?:\/\/(www\.)?[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}\/?$/)
+  .withMessage("WebsiteUrl should be a valid URL");
+
+export const blogValidationMiddleware = [
+  blogNameValidator,
+  blogDescriptionValidator,
+  blogWebsiteUrlValidator,
+];
+
+export const postTitleValidator = body("title")
+  .isString()
+  .withMessage("Title should be a string")
+  .trim()
+  .isLength({ min: 1, max: 30 })
+  .withMessage("Title should be from 1 to 30 characters long");
+
+export const postShortDescriptionValidator = body("shortDescription")
+  .isString()
+  .withMessage("ShortDescription should be a string")
+  .trim()
+  .isLength({ min: 1, max: 100 })
+  .withMessage("ShortDescription should be from 1 to 100 characters long");
+
+export const postContentValidator = body("content")
+  .isString()
+  .withMessage("Content should be a string")
+  .trim()
+  .isLength({ min: 1, max: 1000 })
+  .withMessage("Content should be from 1 to 1000 characters long");
+
+export const postBlogIdValidator = body("blogId")
+  .isString()
+  .withMessage("BlogId should be a string")
+  .custom((value) => {
+    if (!db.blogs.some((b) => b.id === value)) {
+      throw new Error("Blog doesn't exist");
+    }
+    return true;
+  });
+
+export const postValidationMiddleware = [
+  postTitleValidator,
+  postShortDescriptionValidator,
+  postContentValidator,
+  postBlogIdValidator,
+];

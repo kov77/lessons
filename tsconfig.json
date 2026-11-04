@@ -9,12 +9,7 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "src": ["src/index.ts"],
-      "src/*": ["src/*"]
-    }
+    "types": ["node", "express", "jest"],
   },
-  "include": ["src/**/*"],
-  "exclude": ["__tests__", "dist", "node_modules"]
+  "exclude": ["dist", "node_modules", "__tests__"]
 }
