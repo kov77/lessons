@@ -1,5 +1,6 @@
 import { type Request, type Response, Router } from "express";
 import { blogsRepository } from "../repositories/blogs-repository";
+import { authMiddleware } from "../middlewares/auth.middleware";
 import {
   blogValidationMiddleware,
   handleValidationResult,
@@ -14,6 +15,7 @@ blogsRouter.get("/", (req: Request, res: Response) => {
 
 blogsRouter.post(
   "/",
+  authMiddleware,
   ...blogValidationMiddleware,
   handleValidationResult,
   (req: Request, res: Response) => {
@@ -44,6 +46,7 @@ blogsRouter.get(
 
 blogsRouter.put(
   "/:id",
+  authMiddleware,
   ...blogValidationMiddleware,
   handleValidationResult,
   (req: Request, res: Response) => {
@@ -70,7 +73,7 @@ blogsRouter.put(
   },
 );
 
-blogsRouter.delete("/:id", (req: Request, res: Response) => {
+blogsRouter.delete("/:id", authMiddleware, (req: Request, res: Response) => {
   const id = req.params.id;
   const blogIndex = blogsRepository.getAllBlogs().findIndex((b) => b.id === id);
 
