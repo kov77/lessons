@@ -69,7 +69,7 @@ blogsRouter.put(
 
     blogsRepository.getAllBlogs()[blogIndex] = updatedBlog;
 
-    res.status(200).send(updatedBlog);
+    res.sendStatus(204);
   },
 );
 
