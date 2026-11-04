@@ -1,4 +1,5 @@
 import { body, param, validationResult } from "express-validator";
+import { db } from "../../../db/db";
 import { NextFunction, Request, Response } from "express";
 
 const validResolutions = [
@@ -145,4 +146,42 @@ export const blogValidationMiddleware = [
   blogNameValidator,
   blogDescriptionValidator,
   blogWebsiteUrlValidator,
+];
+
+export const postTitleValidator = body("title")
+  .isString()
+  .withMessage("Title should be a string")
+  .trim()
+  .isLength({ min: 1, max: 30 })
+  .withMessage("Title should be from 1 to 30 characters long");
+
+export const postShortDescriptionValidator = body("shortDescription")
+  .isString()
+  .withMessage("ShortDescription should be a string")
+  .trim()
+  .isLength({ min: 1, max: 100 })
+  .withMessage("ShortDescription should be from 1 to 100 characters long");
+
+export const postContentValidator = body("content")
+  .isString()
+  .withMessage("Content should be a string")
+  .trim()
+  .isLength({ min: 1, max: 1000 })
+  .withMessage("Content should be from 1 to 1000 characters long");
+
+export const postBlogIdValidator = body("blogId")
+  .isString()
+  .withMessage("BlogId should be a string")
+  .custom((value) => {
+    if (!db.blogs.some((b) => b.id === value)) {
+      throw new Error("Blog doesn't exist");
+    }
+    return true;
+  });
+
+export const postValidationMiddleware = [
+  postTitleValidator,
+  postShortDescriptionValidator,
+  postContentValidator,
+  postBlogIdValidator,
 ];
