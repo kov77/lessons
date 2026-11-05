@@ -1,59 +1,45 @@
-import { db } from "../db/db";
-
-let nextId = 1;
+import { WithId } from "mongodb";
+import { postCollection } from "../db/collections";
+import { Post } from "../types/post";
+import { toObjectId } from "../utils/object-id";
 
 export const postsRepository = {
-  getAllPosts() {
-    return db.posts;
+  async findAll(): Promise<WithId<Post>[]> {
+    return postCollection.find().toArray();
   },
-  getPostById(id: string) {
-    return db.posts.find((p) => p.id === id);
-  },
-  addNewPost(
-    title: string,
-    shortDescription: string,
-    content: string,
-    blogId: string,
-  ) {
-    const blog = db.blogs.find((b) => b.id === blogId);
-    const newPost = {
-      id: (nextId++).toString(),
-      title,
-      shortDescription,
-      content,
-      blogId,
-      blogName: blog?.name ?? "",
-    };
-    db.posts.push(newPost);
-    return newPost;
-  },
-  updatePost(
-    id: string,
-    title: string,
-    shortDescription: string,
-    content: string,
-    blogId: string,
-  ) {
-    const post = db.posts.find((p) => p.id === id);
-    if (!post) return false;
 
-    const blog = db.blogs.find((b) => b.id === blogId);
-    Object.assign(post, {
-      title,
-      shortDescription,
-      content,
-      blogId,
-      blogName: blog?.name ?? post.blogName,
-    });
-    return true;
+  async findById(id: string): Promise<WithId<Post> | null> {
+    const _id = toObjectId(id);
+    return _id ? postCollection.findOne({ _id }) : null;
   },
-  deletePost(id: string) {
-    const index = db.posts.findIndex((p) => p.id === id);
-    if (index === -1) return false;
-    db.posts.splice(index, 1);
-    return true;
+
+  async create(newPost: Post): Promise<WithId<Post>> {
+    const insertResult = await postCollection.insertOne({ ...newPost });
+    return { ...newPost, _id: insertResult.insertedId };
   },
-  deleteAllPosts() {
-    db.posts = [];
+
+  // Returns true if the post was found and updated, false otherwise
+  async update(id: string, post: Omit<Post, "createdAt">): Promise<boolean> {
+    const _id = toObjectId(id);
+    if (!_id) return false;
+
+    const updateResult = await postCollection.updateOne(
+      { _id },
+      { $set: post },
+    );
+    return updateResult.matchedCount > 0;
+  },
+
+  // Returns true if the post was found and deleted, false otherwise
+  async delete(id: string): Promise<boolean> {
+    const _id = toObjectId(id);
+    if (!_id) return false;
+
+    const deleteResult = await postCollection.deleteOne({ _id });
+    return deleteResult.deletedCount > 0;
+  },
+
+  async deleteAll(): Promise<void> {
+    await postCollection.deleteMany({});
   },
 };
