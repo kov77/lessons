@@ -1,12 +1,7 @@
 import { Router } from "express";
-import type { Request, Response } from "express";
-import { postsRepository } from "../repositories/posts-repository";
-import { blogsRepository } from "../repositories/blogs-repository";
+import { asyncHandler } from "../middlewares/async-handler";
+import { deleteAllDataHandler } from "./handlers/testing/delete-all-data.handler";
 
 export const testsRouter = Router();
 
-testsRouter.delete("/all-data", (req: Request, res: Response) => {
-  blogsRepository.deleteAllBlogs();
-  postsRepository.deleteAllPosts();
-  res.sendStatus(204);
-});
+testsRouter.delete("/all-data", asyncHandler(deleteAllDataHandler));
