@@ -1,27 +1,20 @@
 import express from "express";
-import { testsRouter } from "./routes/tests.router";
-import { videosRouter } from "./routes/videos.router";
 import { setupApp } from "./setup-app";
-import {
-  BLOGS_PATH,
-  POSTS_PATH,
-  PORT,
-  TESTING_PATH,
-  VIDEOS_PATH,
-} from "./constants";
-import { blogsRouter } from "./routes/blogs.routes";
-import { postsRouter } from "./routes/posts.routes";
+import { SETTINGS } from "./settings/config";
+import { runDB } from "./db/mongo.db";
 
 const app = express();
 setupApp(app);
 
-app.use(VIDEOS_PATH, videosRouter);
-app.use(TESTING_PATH, testsRouter);
-app.use(BLOGS_PATH, blogsRouter);
-app.use(POSTS_PATH, postsRouter);
+const bootstrap = async () => {
+  await runDB(SETTINGS.MONGO_URI);
 
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}`);
-});
+  app.listen(SETTINGS.PORT, () => {
+    console.log(`Example app listening on port ${SETTINGS.PORT}`);
+  });
+};
 
+bootstrap();
+
+// Vercel requires the app as the default export
 export default app;
