@@ -1,5 +1,5 @@
 import { body, param, validationResult } from "express-validator";
-import { db } from "../../../db/db";
+import { blogsRepository } from "../../../repositories/blogs-repository";
 import { NextFunction, Request, Response } from "express";
 
 const validResolutions = [
@@ -139,7 +139,9 @@ export const blogWebsiteUrlValidator = body("websiteUrl")
   .withMessage("WebsiteUrl is required")
   .isLength({ min: 1, max: 100 })
   .withMessage("WebsiteUrl should be from 1 to 100 characters long")
-  .matches(/^https?:\/\/(www\.)?[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}\/?$/)
+  .matches(
+    /^https:\/\/([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$/,
+  )
   .withMessage("WebsiteUrl should be a valid URL");
 
 export const blogValidationMiddleware = [
@@ -172,8 +174,11 @@ export const postContentValidator = body("content")
 export const postBlogIdValidator = body("blogId")
   .isString()
   .withMessage("BlogId should be a string")
-  .custom((value) => {
-    if (!db.blogs.some((b) => b.id === value)) {
+  .isMongoId()
+  .withMessage("BlogId should be a valid ObjectId")
+  .custom(async (value) => {
+    const blog = await blogsRepository.findById(value);
+    if (!blog) {
       throw new Error("Blog doesn't exist");
     }
     return true;
