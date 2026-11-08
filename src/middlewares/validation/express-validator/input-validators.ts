@@ -13,7 +13,7 @@ const validResolutions = [
   "P2160",
 ];
 
-const formatErrors = (error: any) => ({
+const formatErrors = (error: { path?: string; msg: string }) => ({
   field: error.path,
   message: error.msg,
 });
