@@ -13,7 +13,7 @@ const validResolutions = [
   "P2160",
 ];
 
-const formatErrors = (error: any) => ({
+const formatErrors = (error: { path?: string; msg: string }) => ({
   field: error.path,
   message: error.msg,
 });
@@ -183,6 +183,12 @@ export const postBlogIdValidator = body("blogId")
     }
     return true;
   });
+
+export const blogPostValidationMiddleware = [
+  postTitleValidator,
+  postShortDescriptionValidator,
+  postContentValidator,
+];
 
 export const postValidationMiddleware = [
   postTitleValidator,

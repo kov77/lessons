@@ -10,6 +10,7 @@ export default tseslint.config(
   tseslint.configs.recommended,
   {
     rules: {
+      "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-unused-vars": ["warn"],
       "@typescript-eslint/explicit-function-return-type": "off",
       "no-console": "warn",
