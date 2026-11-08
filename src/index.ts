@@ -7,6 +7,10 @@ const app = express();
 setupApp(app);
 
 const bootstrap = async () => {
+  if (!SETTINGS.MONGO_URI) {
+    throw new Error("MONGO_URI environment variable is not set");
+  }
+
   await runDB(SETTINGS.MONGO_URI);
 
   app.listen(SETTINGS.PORT, () => {
