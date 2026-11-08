@@ -184,6 +184,12 @@ export const postBlogIdValidator = body("blogId")
     return true;
   });
 
+export const blogPostValidationMiddleware = [
+  postTitleValidator,
+  postShortDescriptionValidator,
+  postContentValidator,
+];
+
 export const postValidationMiddleware = [
   postTitleValidator,
   postShortDescriptionValidator,

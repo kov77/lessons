@@ -1,11 +1,30 @@
 import { WithId } from "mongodb";
 import { blogCollection } from "../db/collections";
 import { Blog } from "../types/blog";
+import { PaginationQuery } from "../types/pagination";
+import { escapeRegExp } from "../utils/pagination";
 import { toObjectId } from "../utils/object-id";
 
 export const blogsRepository = {
-  async findAll(): Promise<WithId<Blog>[]> {
-    return blogCollection.find().toArray();
+  async findAll(
+    { pageNumber, pageSize, sortBy, sortDirection }: PaginationQuery,
+    searchNameTerm?: string,
+  ): Promise<{ items: WithId<Blog>[]; totalCount: number }> {
+    const filter = searchNameTerm
+      ? { name: { $regex: escapeRegExp(searchNameTerm), $options: "i" } }
+      : {};
+
+    const [items, totalCount] = await Promise.all([
+      blogCollection
+        .find(filter)
+        .sort({ [sortBy]: sortDirection === "asc" ? 1 : -1, _id: 1 })
+        .skip((pageNumber - 1) * pageSize)
+        .limit(pageSize)
+        .toArray(),
+      blogCollection.countDocuments(filter),
+    ]);
+
+    return { items, totalCount };
   },
 
   async findById(id: string): Promise<WithId<Blog> | null> {
